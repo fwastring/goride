@@ -1,4 +1,4 @@
-# Carpool App
+# goride
 
 Mock implementation of our carpool app - but in Golang with HTML and PostGIS
 
@@ -18,6 +18,5 @@ docker run -t -v "$(pwd):/data" ghcr.io/project-osrm/osrm-backend osrm-customize
 Deploy the app:
 
 ```bash
-
 docker compose up -d --build # Starts DB, OSRM backend, go API and frontend
 ```

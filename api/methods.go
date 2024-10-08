@@ -27,7 +27,8 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 
 func initDatabase() *sql.DB {
 
-	connStr := "user=myuser dbname=mydb password=mypassword host=postgis-db port=5432 sslmode=disable"
+	// connStr := "user=myuser dbname=mydb password=mypassword host=postgis-db port=5432 sslmode=disable"
+	connStr := "user=myuser dbname=mydb password=mypassword host=localhost port=5432 sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -261,7 +262,7 @@ func findMatchingRoutes(db *sql.DB, pickupLat, pickupLng, dropoffLat, dropoffLng
 
 // getRouteFromOSRM fetches the route from the OSRM API.
 func getRouteFromOSRM(pointA Point, pointB Point) (OsrmResponse, error) {
-	url := fmt.Sprintf("http://osrm-backend:5000/route/v1/driving/%.4f,%.4f;%.4f,%.4f?overview=full&geometries=geojson", pointA.Longitude, pointA.Latitude, pointB.Longitude, pointB.Latitude)
+	url := fmt.Sprintf("http://localhost:5000/route/v1/driving/%.4f,%.4f;%.4f,%.4f?overview=full&geometries=geojson", pointA.Longitude, pointA.Latitude, pointB.Longitude, pointB.Latitude)
 	blank := OsrmResponse{}
 
 	resp, err := http.Get(url)
