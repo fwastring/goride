@@ -1,0 +1,38 @@
+@startuml
+actor       Driver        as u
+participant Frontend 		as fe
+participant API 		as api
+participant "OSM API" 		as osm
+participant OSRM 		as osrm
+participant Leaflet 		as leaf
+database DB 		as db
+
+u -> fe : Enter start and end address
+fe -> api : createRoute(string, string)
+api -> osm : getCoordinate(string)
+api <-- osm : return Coordinate
+api -> osm : getCoordinate(string)
+api <-- osm : return Coordinate
+
+api -> osrm : findRoute(Coordinate, Coordinate)
+api <-- osrm : return OsrmResponse
+
+api -> api : Geometry = Osrm.Geometry.toPlain
+
+api -> db : addRoute(Geometry)
+db -> db : INSERT INTO routes(ID, Geometry)
+api <-- db : return true
+
+api -> db : addTrip(ID, Coordinate, Coordinate)
+db -> db : INSERT INTO trips(ID, startpoint, endpoint, NULL, NULL)
+api <-- db : return true
+
+fe <-- api : return Osrm.Geometry
+fe -> api : drawRoute(Geometry)
+api -> leaf : for each Coord -> drawOnMap(Coordinate)
+
+u <- leaf : Route is shown
+
+@enduml
+
+

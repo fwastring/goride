@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  postgis:
+    image: postgis/postgis:15-3.3  # PostgreSQL 15 with PostGIS 3.3
+    container_name: postgis-db
+    environment:
+      POSTGRES_USER: myuser       # Default username
+      POSTGRES_PASSWORD: mypassword  # Default password
+      POSTGRES_DB: mydb           # Default database name
+    ports:
+      - "5432:5432"               # Exposes port 5432
+    volumes:
+      - postgis_data:/var/lib/postgresql/data  # Persist database data
+
+  osrm-backend:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    container_name: osrm-backend
+    command: osrm-routed --algorithm mld /data/sweden-latest.osrm
+    ports:
+      - "5000:5000"               # Exposes port 5000 for OSRM
+    volumes:
+      - ./data:/data              # Bind mount current directory's data folder to /data in the container
+    depends_on:
+      - postgis                   # OSRM can depend on PostGIS if necessary (optional)
+
+volumes:
+  postgis_data:
+    driver: local
