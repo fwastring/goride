@@ -4,6 +4,10 @@ Mock implementation of our carpool app - but in Golang with HTML and PostGIS
 
 ## Usage
 
+Placename API - to get a queryable list of placenames we use [pelias](https://github.com/pelias/pelias) hosted on our own machine.
+The enpoint is at:
+`http://<host-ip>:4000/v1/autocomplete`
+
 Prepare the OSRM backend:
 
 ```bash

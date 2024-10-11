@@ -7,40 +7,49 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
-            height: 600px;
+            height: 1080px;
             width: 100%;
+        }
+		.map-overlay {
+            position: absolute;
+            top: 20px;
+            left: 65px;
+            z-index: 1000; /* Ensure it's above the map */
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
-
-	<h1>Check if Two Points are on the Same Route</h1>
-
     <!-- Input fields for two addresses -->
-	<div>
-		<h2>Find Ride</h2>
-		<label for="address1">Address 1:</label>
-		<input type="text" id="address1" placeholder="Enter first address">
+	<div class="map-overlay">
+		<div>
+			<h2>Create Ride</h2>
+			<label for="createAddress1">Address 1:</label>
+			<input type="text" id="createAddress1" placeholder="Enter first address">
 
-		<label for="address2">Address 2:</label>
-		<input type="text" id="address2" placeholder="Enter second address">
+			<label for="createAddress2">Address 2:</label>
+			<input type="text" id="createAddress2" placeholder="Enter second address">
 
-		<button onclick="checkPoints()">Check Route</button>
-	</div>
-	<div>
-		<h2>Create Ride</h2>
-		<label for="createAddress1">Address 1:</label>
-		<input type="text" id="createAddress1" placeholder="Enter first address">
+			<button onclick="createRoute()">Check Route</button>
+		</div>
+		<div>
+			<h2>Find Ride</h2>
+			<label for="address1">Address 1:</label>
+			<input type="text" id="address1" placeholder="Enter first address">
 
-		<label for="createAddress2">Address 2:</label>
-		<input type="text" id="createAddress2" placeholder="Enter second address">
+			<label for="address2">Address 2:</label>
+			<input type="text" id="address2" placeholder="Enter second address">
 
-		<button onclick="createRoute()">Check Route</button>
+			<button onclick="checkPoints()">Check Route</button>
+		</div>
+		<button onclick="clearRoutes()">Clear Routes</button>
 	</div>
 
 	<!-- Map to display the route -->
     <div id="map"></div>
-	<button onclick="clearRoutes()">Clear Routes</button>
 
 
 
@@ -69,7 +78,7 @@
             const payload = JSON.stringify({ from: address1, to: address2 });
 
             // Send POST requests to the /api/on-route endpoint for both addresses
-			fetch('http://localhost:8080/api/add-route', {
+			fetch('/api/add-route', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -98,7 +107,7 @@
             const payload = JSON.stringify({ from: address1, to: address2 });
 
             // Send POST requests to the /api/on-route endpoint for both addresses
-			fetch('http://localhost:8080/api/on-route', {
+			fetch('/api/on-route', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -119,7 +128,7 @@
 			console.log(id)
             const payload = JSON.stringify({ id: id });
             // Send POST requests to the /api/on-route endpoint for both addresses
-			fetch('http://localhost:8080/api/route', {
+			fetch('/api/route', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -143,7 +152,7 @@
         function displayRoute() {
             // const routeId = 12; // Change this to match your database route ID
 
-				fetch(`http://localhost:8080/api/routes`)
+				fetch(`/api/routes`)
 					.then(response => response.json())
 					.then(data => {
 						console.log(data)
@@ -165,7 +174,7 @@
         }
 
         function clearRoutes() {
-			fetch(`http://localhost:8080/api/routes/delete`, {method: 'DELETE'})
+			fetch(`/api/routes/delete`, {method: 'DELETE'})
 				.then(response => response.json())
 				.then(data => {
 					console.log(data)
