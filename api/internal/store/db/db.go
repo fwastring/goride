@@ -1,55 +1,45 @@
 package db
 
 import (
-	"database/sql"
+	// "database/sql"
 	// "fmt"
-	"goride/internal/store"
-	"os"
+	// "goride/internal/store"
+	// "os"
+	// "fmt"
+	"log"
 
 	_ "github.com/shaxbee/go-spatialite"
-	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
+	// "gorm.io/driver/sqlite" // Sqlite driver based on CGO
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-func open(dbName string) (*gorm.DB, error) {
 
-	// Create the temp directory if it doesn't exist
-	err := os.MkdirAll("/tmp", 0755)
+func InitDatabase() *gorm.DB {
+
+	// connStr := "user=myuser dbname=mydb password=mypassword host=postgis-db port=5432 sslmode=disable"
+	connStr := "user=myuser dbname=mydb password=mypassword host=localhost port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(connStr))
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Open the SQLite database with mattn/go-sqlite3
-	sqlDB, err := sql.Open("spatialite", dbName)
-	if err != nil {
-		return nil, err
-	}
+	db.Exec(`CREATE EXTENSION IF NOT EXISTS postgis;`)
+	// fmt.Print(tx)
+	// if err != nil {
+	// 	log.Fatalf("Failed to create PostGIS extension: %v", err)
+	// }
 
+	db.Exec(`
+		CREATE TABLE IF NOT EXISTS routes (
+			id SERIAL PRIMARY KEY,
+			geometry GEOMETRY(LineString, 4326)
+		);
+	`)
 
-	// Wrap the raw SQL connection with GORM
-	db, err := gorm.Open(sqlite.Dialector{Conn: sqlDB}, &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+	// err = db.AutoMigrate(&store.Route{}, &store.User{})
 
-	return db, nil
-}
-
-func MustOpen(dbName string) *gorm.DB {
-
-	if dbName == "" {
-		dbName = "goth.db"
-	}
-
-	db, err := open(dbName)
-	if err != nil {
-		panic(err)
-	}
-
-	// Automatically migrate the database schemas for User and Session
-	err = db.AutoMigrate(&store.User{}, &store.Session{})
-	if err != nil {
-		panic(err)
-	}
-
+	// if err != nil {
+	// 	log.Fatalf("Failed to create table: %v", err)
+	// }
 	return db
 }
