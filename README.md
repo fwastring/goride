@@ -2,6 +2,26 @@
 
 Mock implementation of our carpool app - but in Golang with HTML and PostGIS
 
+## Development
+
+Backend:
+```bash
+cd api
+nix-shell
+make dev
+```
+
+Frontend:
+```bash
+cd frontend-vue
+npm run dev
+```
+
+Other:
+```bash
+docker compose up -d --build
+```
+
 ## Usage
 
 Placename API - to get a queryable list of placenames we use [pelias](https://github.com/pelias/pelias) hosted on our own machine.
