@@ -6,17 +6,18 @@ let
 
   fhsEnv = 
     buildFHSEnv {
-      name = "sqlite-with-libspatialite";
+      name = "geos";
       targetPkgs = pkgs:
         builtins.attrValues {
           inherit (pkgs)
-            sqlite libspatialite
+            geos
           ;
         };
 
       # Ensure /usr/lib is part of the library search path.
       profile = ''
-        export LD_LIBRARY_PATH="/usr/lib"
+		export LD_LIBRARY_PATH="${pkgs.geos}/lib:$LD_LIBRARY_PATH"
+      export CPATH="${pkgs.geos}/include:$CPATH"   # Add the path to geos_c.h
       '';
     };
 in

@@ -1,9 +1,10 @@
 package dbstore
 
 import (
-	"goride/internal/types"
+	// "goride/internal/store/db"
+	"goride/internal/store"
+	"goride/internal/store/types"
 
-	// "github.com/spatial-go/geoos/geoencoding/geojson"
 	"gorm.io/gorm"
 )
 
@@ -21,19 +22,22 @@ func NewRouteStore(params NewRouteStoreParams) *RouteStore {
 	}
 }
 
-func (s *RouteStore) CreateRoute(geometry types.Geometry) error {
-	return s.db.Create(&types.Route{
-		Geometry: geometry,
-	}).Error
+
+func (s *RouteStore) CreateRoute(geometry types.Geometry4326) error {
+    route := store.Route{
+        Geometry: geometry,
+    }
+
+	return s.db.Create(&route).Error
 }
 
-func (s *RouteStore) GetRoute(id uint) (*types.Route, error) {
+func (s *RouteStore) UpdateRoute(route store.Route) error {
+	return s.db.Save(&route).Error
+}
 
-	var route types.Route
-	err := s.db.Where("id = ?", id).First(&route).Error
+func (s *RouteStore) GetRoute(id uint) (store.Route, error) {
+    var route store.Route
+    err := s.db.Where("id = ?", id).First(&route).Error
 
-	if err != nil {
-		return nil, err
-	}
-	return &route, err
+    return route, err  // Returns both, route and err (nil if no error)
 }

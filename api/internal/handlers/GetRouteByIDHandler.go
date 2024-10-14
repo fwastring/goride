@@ -6,12 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	// "strconv"
-
-	// "github.com/spatial-go/geoos/geoencoding/geojson"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	// "gorm.io/gorm/logger"
 )
 
 type GetRouteByIDHandler struct {
@@ -23,7 +19,6 @@ type GetRouteByIDHandlerParams struct {
 	Logger         slog.Logger
 	Database 	   gorm.DB
 }
-
 
 func NewGetRouteByIDHandler(params GetRouteByIDHandlerParams) *GetRouteByIDHandler {
 	return &GetRouteByIDHandler{
@@ -37,9 +32,7 @@ func (h *GetRouteByIDHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r 
 	idInt, _ := strconv.Atoi(c.Query("id"))
 	id := uint(idInt)
 
-
 	routeStore := dbstore.NewRouteStore(dbstore.NewRouteStoreParams{DB: &h.database})
-
 
 	route, err := routeStore.GetRoute(id)
 	if err != nil {

@@ -1,6 +1,8 @@
 package store
 
 import (
+	"goride/internal/store/types"
+
 	"github.com/spatial-go/geoos/geoencoding/geojson"
 	"gorm.io/gorm"
 )
@@ -13,9 +15,8 @@ type User struct {
 }
 
 type Route struct {
-	gorm.Model
-	ID		 uint 	`gorm:"primaryKey" json:"id"`
-	Geometry Geometry `gorm:"type:geometry"`
+    ID       uint         `gorm:"primaryKey"`
+    Geometry types.Geometry4326 `gorm:"type:geometry"`  // Geometry field with PostGIS
 }
 
 type Geometry struct {

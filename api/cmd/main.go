@@ -1,15 +1,17 @@
 package main
 
 import (
-	"fmt"
-	// "goride/internal/config"
 	"goride/internal/handlers"
+	"goride/internal/store"
 	"log/slog"
 	"os"
 
-	database "goride/internal/store/db"
-	_ "github.com/lib/pq"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+
+	// "github.com/paulsmith/gogeos/geos"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var Environment = "development"
@@ -21,10 +23,25 @@ func main() {
 
 	// Load the config
 	// cfg := config.MustLoadConfig()
+	dbURL := "postgres://myuser:mypassword@localhost:5432/mydb"
 
 	// Initialize database
-	db := database.InitDatabase()
-	fmt.Print(db)
+	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+	if err != nil {
+		logger.Error("Failed to connect to database: %v", err)
+	}
+
+	db.Exec(`CREATE EXTENSION IF NOT EXISTS postgis;`)
+	// point, err := geos.NewPoint(geos.NewCoord(40.7128, -74.0060)) // Example coordinates for New York
+	db.AutoMigrate(&store.Route{})
+
+
+    var route store.Route
+    err = db.Where("id = ?", 3).First(&route).Error
+
+    if err != nil {
+		logger.Error("Failed to insert to database: %v", err)
+    }
 
 	// Set up middlewares
 	r.Use(gin.Logger())

@@ -5,8 +5,7 @@ type OsrmResponse struct {
 }
 
 type Route struct {
-	ID string `json:"id"`
-	Geometry `json:"geometry"`
+	Geometry Geometry `json:"geometry"`
 }
 
 type Geometry struct {
