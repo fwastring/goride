@@ -5,13 +5,13 @@ import (
 	"goride/internal/store"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-
-	// "github.com/paulsmith/gogeos/geos"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"github.com/gin-contrib/cors"
 )
 
 var Environment = "development"
@@ -20,6 +20,16 @@ func main() {
 	// Initialize zap logger
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	r := gin.New()
+
+	r.Use(cors.New(cors.Config{
+        // Allow access from your frontend origin (e.g., Vue frontend)
+        AllowOrigins:     []string{"http://localhost:3000"},  // Adjust this to match your Vue frontend
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: true,
+        MaxAge:           12 * time.Hour,
+    }))
 
 	// Load the config
 	// cfg := config.MustLoadConfig()
@@ -54,7 +64,7 @@ func main() {
 		}).ServeHTTP(c, c.Writer, c.Request)
 	})
 
-	r.GET("/route", func(c *gin.Context) {
+	r.GET("/route/:id", func(c *gin.Context) {
 		handlers.NewGetRouteByIDHandler(handlers.GetRouteByIDHandlerParams{
 			Logger: *logger,
 			Database: *db,

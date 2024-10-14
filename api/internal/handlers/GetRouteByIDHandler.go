@@ -29,7 +29,7 @@ func NewGetRouteByIDHandler(params GetRouteByIDHandlerParams) *GetRouteByIDHandl
 
 func (h *GetRouteByIDHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r *http.Request) {
 	// Parse the incoming JSON request body
-	idInt, _ := strconv.Atoi(c.Query("id"))
+	idInt, _ := strconv.Atoi(c.Param("id"))
 	id := uint(idInt)
 
 	routeStore := dbstore.NewRouteStore(dbstore.NewRouteStoreParams{DB: &h.database})
