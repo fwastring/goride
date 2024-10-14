@@ -1,10 +1,12 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
   font-weight: normal;
+  display: flex; /* Change to flex to align items */
+  flex-direction: column; /* Stack items vertically */
 }
 
 a,
@@ -28,8 +30,22 @@ a,
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex; /* Change to flex to align items horizontally */
+    flex-direction: column; /* Stack items vertically */
+    width: 100%;
     padding: 0 2rem;
   }
+
+  .map-container {
+    flex-grow: 1; /* Allow the map container to grow and fill available space */
+    width: 100%; /* Ensure full width */
+    max-width: 1080px; /* Max width for the map */
+    height: 80vh; /* Set the height */
+    margin: 0 auto; /* Center the map */
+  }
+
+  main {
+	  width: 100%;
+  }
 }
+
