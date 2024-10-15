@@ -6,7 +6,7 @@
   padding: 2rem;
   font-weight: normal;
   display: flex; /* Change to flex to align items */
-  flex-direction: column; /* Stack items vertically */
+  flex-direction: rows; /* Stack items vertically */
 }
 
 a,
