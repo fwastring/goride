@@ -1,32 +1,13 @@
-# Dockerfile for Go backend
-# Start from the official Golang image
-FROM golang:1.22-alpine AS build
-
-# Set the working directory inside the container
+FROM golang:1.22.3 as builder
+ARG CGO_ENABLED=0
 WORKDIR /app
 
-# Copy the Go module files and download dependencies
 COPY api/go.mod api/go.sum ./
 RUN go mod download
+COPY ./api/ .
 
-# Copy the rest of the application source code
-COPY api/. .
+RUN go build
 
-# Build the Go application
-RUN go build -o main .
-
-# Start a new minimal image for running the Go app
-FROM alpine:latest
-
-# Set environment variables (Optional)
-ENV PORT=8080
-
-# Copy the built binary from the builder stage
-COPY --from=build /app/main /app/main
-
-# Expose the application port
-EXPOSE 8080
-
-# Run the Go application
-CMD ["/app/main"]
-
+FROM scratch
+COPY --from=builder /app/goride /server
+ENTRYPOINT ["/goride"]

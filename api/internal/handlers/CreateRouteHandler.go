@@ -10,12 +10,15 @@ import (
 	"strconv"
 	"strings"
 
+	"goride/internal/store"
 	"goride/internal/store/dbstore"
 	"goride/internal/store/types"
 
 	"github.com/gin-gonic/gin"
 	"github.com/paulsmith/gogeos/geos"
 	"gorm.io/gorm"
+	"github.com/twpayne/go-geom/encoding/wkt"
+	gogeom "github.com/twpayne/go-geom"
 )
 
 type CreateRouteHandler struct {
@@ -48,7 +51,7 @@ func (h *CreateRouteHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r *
 		return
 	}
 
-	points := []types.Point{getLocation(addresses.From, h.logger), getLocation(addresses.To, h.logger)}
+	points := []store.Point{getLocation(addresses.From, h.logger), getLocation(addresses.To, h.logger)}
 
 	response, err := getRouteFromOSRM(points, h.logger)
 
@@ -60,7 +63,7 @@ func (h *CreateRouteHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r *
 	routeStore := dbstore.NewRouteStore(dbstore.NewRouteStoreParams{DB: &h.database})
 
 	// Convert the Geometry struct to WKT
-	geometry := types.Geometry(response.Route[0].Geometry)
+	geometry := *response.Geometry
     wkt, err := geometryToWKT(geometry)
 
     if err != nil {
@@ -76,7 +79,7 @@ func (h *CreateRouteHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r *
     // Wrap the *geos.Geometry in your types.Geometry4326 struct
     geometry4326 := types.Geometry4326{Geometry: geosGeom}
 
-	err = routeStore.CreateRoute(geometry4326)
+	err = routeStore.CreateRoute(addresses.From, addresses.To, geometry4326)
 	if err != nil {
 		h.logger.Error("Error error adding route to db: %v", err)
 	}
@@ -86,21 +89,26 @@ func (h *CreateRouteHandler) ServeHTTP(c *gin.Context,w http.ResponseWriter, r *
 }
 
 // Function to convert a Geometry struct to WKT
-func geometryToWKT(geom types.Geometry) (string, error) {
+func geometryToWKT(geom geos.Geometry) (string, error) {
     // Build WKT string for a LineString
     wkt := "LINESTRING("
-    for i, coord := range geom.Coordinates {
+	coords, err := geom.Coords()
+	if err != nil {
+
+	}
+    for i, coord := range coords {
         if i > 0 {
             wkt += ", "
         }
-        wkt += fmt.Sprintf("%f %f", coord[0], coord[1])
+        wkt += fmt.Sprintf("%f %f", coord.X, coord.Y)
     }
     wkt += ")"
     return wkt, nil
 }
 
-func getRouteFromOSRM(points []types.Point, logger slog.Logger) (types.OsrmResponse, error) {
-	blank := types.OsrmResponse{}
+
+func getRouteFromOSRM(points []store.Point, logger slog.Logger) (types.Geometry4326, error) {
+	blank := types.Geometry4326{}
 	if len(points) < 2 {
         return blank, fmt.Errorf("at least two points are required")
     }
@@ -120,31 +128,77 @@ func getRouteFromOSRM(points []types.Point, logger slog.Logger) (types.OsrmRespo
     // Build the final URL
     url := fmt.Sprintf("http://localhost:5000/route/v1/driving/%s?overview=full&geometries=geojson", coordinatesStr)
 
+	// Query the OSRM API
 	resp, err := http.Get(url)
-
 	if err != nil {
 		return blank, err
 	}
 	defer resp.Body.Close()
 
+	// Check if we received a successful status code
 	if resp.StatusCode != http.StatusOK {
 		return blank, fmt.Errorf("error: received status code %d", resp.StatusCode)
 	}
 
+	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return blank, err
 	}
 
-	var osrmResp types.OsrmResponse
+	// Parse the OSRM response to extract GeoJSON geometry
+	var osrmResp struct {
+		Routes []struct {
+			Geometry struct {
+				Coordinates [][]float64 `json:"coordinates"`
+				Type        string      `json:"type"`
+			} `json:"geometry"`
+		} `json:"routes"`
+	}
+
 	if err := json.Unmarshal(body, &osrmResp); err != nil {
 		return blank, err
 	}
 
-	return osrmResp, nil
+	// Check if any routes were returned
+	if len(osrmResp.Routes) == 0 {
+		return blank, fmt.Errorf("no routes found in OSRM response")
+	}
+
+	// Extract the geometry of the first route (which is a LineString)
+	routeGeometry := osrmResp.Routes[0].Geometry
+
+	// Create a go-geom LineString and set its coordinates
+	lineString := gogeom.NewLineString(gogeom.XY)
+	var coords []gogeom.Coord
+	for _, coord := range routeGeometry.Coordinates {
+		coords = append(coords, gogeom.Coord{coord[0], coord[1]})
+	}
+
+	// Set the coordinates of the LineString
+	if lineString, err = lineString.SetCoords(coords); err != nil {
+		return blank, fmt.Errorf("error setting LineString coordinates: %w", err)
+	}
+
+	// Marshal the go-geom LineString to WKT (Well-Known Text)
+	wktStr, err := wkt.Marshal(lineString)
+	if err != nil {
+		return blank, fmt.Errorf("error marshaling geometry to WKT: %w", err)
+	}
+
+	// Convert WKT to geos.Geometry
+	geom, err := geos.FromWKT(wktStr)
+	if err != nil {
+		return blank, fmt.Errorf("error converting WKT to geos.Geometry: %w", err)
+	}
+
+	// Return the Geometry4326 object
+	return types.Geometry4326{Geometry: geom}, nil
 }
 
-func getLocation(address string, logger slog.Logger) types.Point {
+
+
+func getLocation(address string, logger slog.Logger) store.Point {
     baseURL := "https://nominatim.openstreetmap.org/search"
 
     params := url.Values{}
@@ -164,7 +218,7 @@ func getLocation(address string, logger slog.Logger) types.Point {
     }
 
     // Unmarshal the JSON response into a slice of Location
-    var locations []types.Location
+    var locations []store.Location
     if err := json.Unmarshal(body, &locations); err != nil {
 		logger.Error("Error reading body: %s \n", err)
     }
@@ -172,7 +226,7 @@ func getLocation(address string, logger slog.Logger) types.Point {
     // Print the location data
 	lon, err := strconv.ParseFloat(locations[0].Lon, 64)
 	lat, err := strconv.ParseFloat(locations[0].Lat, 64)
-	point := types.Point{Longitude: lon, Latitude: lat}
+	point := store.Point{Longitude: lon, Latitude: lat}
 	return point
 }
 

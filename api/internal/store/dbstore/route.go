@@ -23,8 +23,10 @@ func NewRouteStore(params NewRouteStoreParams) *RouteStore {
 }
 
 
-func (s *RouteStore) CreateRoute(geometry types.Geometry4326) error {
+func (s *RouteStore) CreateRoute(addressFrom string, addressTo string, geometry types.Geometry4326) error {
     route := store.Route{
+		StartAddress: addressFrom,
+		EndAddress: addressTo,
         Geometry: geometry,
     }
 
@@ -40,4 +42,15 @@ func (s *RouteStore) GetRoute(id uint) (store.Route, error) {
     err := s.db.Where("id = ?", id).First(&route).Error
 
     return route, err  // Returns both, route and err (nil if no error)
+}
+
+func (s *RouteStore) GetAllRoutes() ([]store.Route, error) {
+    var routes []store.Route
+    result := s.db.Find(&routes)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+    return routes, nil
 }

@@ -7,6 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// type osrmresponse struct {
+// 	route []routeresponse `json:"routes"`
+// }
+//
+// type routeresponse struct {
+//     ID       uint         
+//     Geometry Geometry
+// }
+//
 type User struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey" json:"id"`
@@ -14,14 +23,23 @@ type User struct {
 	Password string `json:"-"`
 }
 
+
 type Route struct {
     ID       uint         `gorm:"primaryKey"`
+	StartAddress string
+	EndAddress string
     Geometry types.Geometry4326 `gorm:"type:geometry"`  // Geometry field with PostGIS
 }
 
-type Geometry struct {
-	Coordinates [][]float64 `json:"coordinates"`
-	Type        string      `json:"type"`
+type Point struct {
+	Longitude float64
+	Latitude float64
+}
+
+type Location struct {
+    DisplayName string  `json:"display_name"`
+    Lat         string  `json:"lat"`
+    Lon         string  `json:"lon"`
 }
 
 type UserStore interface {

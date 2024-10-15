@@ -1,0 +1,51 @@
+@import './base.css';
+
+#app {
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+  display: flex; /* Change to flex to align items */
+  flex-direction: rows; /* Stack items vertically */
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: flex; /* Change to flex to align items horizontally */
+    flex-direction: column; /* Stack items vertically */
+    width: 100%;
+    padding: 0 2rem;
+  }
+
+  .map-container {
+    flex-grow: 1; /* Allow the map container to grow and fill available space */
+    width: 100%; /* Ensure full width */
+    max-width: 1080px; /* Max width for the map */
+    height: 80vh; /* Set the height */
+    margin: 0 auto; /* Center the map */
+  }
+
+  main {
+	  width: 100%;
+  }
+}
+
