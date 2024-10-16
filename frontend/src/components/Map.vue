@@ -6,7 +6,7 @@
         layer-type="base"
         name="OpenStreetMap"
       ></l-tile-layer>
-      <l-polyline v-if="routePolyline" :lat-lngs="routePolyline" />
+	<l-polyline v-if="route" :lat-lngs="route.Geometry.coordinates"></l-polyline>
     </l-map>
   </div>
 </template>
@@ -18,6 +18,7 @@ import Button from 'primevue/button';
 import { LMap, LTileLayer, LPolyline } from "@vue-leaflet/vue-leaflet"; // Import LPolyline for displaying the route
 
 export default {
+	props: ['route'],
   components: {
     LMap,
     LTileLayer,
@@ -30,12 +31,27 @@ export default {
       zoom: 12, // Adjust the zoom level
       center: [64, 17], // Center of the map
       routePolyline: null, // To store route coordinates as polyline
+		map: null,
     };
   },
   methods: {
   onMapReady(map) {
       console.log('Map is ready:', map);
+	  this.map = map
       // You can now use the map instance for further operations
+    },
+  },
+watch: {
+    route(newRoute) {
+      if (newRoute) {
+		let coordinates = newRoute.Geometry.coordinates
+        this.center = coordinates[0]; // Center the map on the route
+
+		this.map.fitBounds([
+			coordinates[0],
+			coordinates[coordinates.length-1]
+		])
+      }
     },
   },
 };

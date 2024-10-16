@@ -172,7 +172,7 @@ func getRouteFromOSRM(points []store.Point, logger slog.Logger) (types.Geometry4
 	lineString := gogeom.NewLineString(gogeom.XY)
 	var coords []gogeom.Coord
 	for _, coord := range routeGeometry.Coordinates {
-		coords = append(coords, gogeom.Coord{coord[0], coord[1]})
+		coords = append(coords, gogeom.Coord{coord[1], coord[0]})
 	}
 
 	// Set the coordinates of the LineString
