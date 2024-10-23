@@ -4,13 +4,13 @@ Hobby implementation of a carpooling service
 
 ## Tech
 
-Backend: Golang Gin-gonic with GORM
+__Backend__: Golang
 
-Frontend: Vue
+__Frontend__: Vue.js
 
-DB: PostGIS
+__DB__: PostGIS
 
-Routing: OSRM
+__Routing__: OSRM
 
 ## Requirements
 
