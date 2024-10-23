@@ -17,13 +17,6 @@ const routeApi = axios.create({
   }
 });
 
-const routesApi = axios.create({
-  baseURL: `${BASE_URL}/routes`,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
-
 // Example User API functions
 export const getUser = (id) => {
   return userApi.get(`/${id}`);
@@ -47,19 +40,27 @@ export const getRoute = (id) => {
 };
 
 export const createRoute = (routeData) => {
-  return routeApi.post('/', routeData);
+  return routeApi.post('/create', routeData);
+};
+
+export const searchRoute = (routeData) => {
+  return routeApi.post('/search', routeData);
+};
+
+export const joinRoute = (routeData) => {
+  return routeApi.post('/join', routeData);
 };
 
 export const updateRoute = (id, routeData) => {
   return routeApi.put(`/${id}`, routeData);
 };
 
-export const deleteRoute = (id) => {
-  return routeApi.delete(`/${id}`);
+export const deleteRoute = (routeData) => {
+  return routeApi.post(`/delete`, routeData);
 };
 
 
 // Example Routes API functions
 export const getRoutes = () => {
-  return routesApi.get();
+  return routeApi.get(`/all`);
 };

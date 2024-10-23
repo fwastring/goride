@@ -1,5 +1,32 @@
 @import './base.css';
 
+/* Add styles for layout */
+.layout-container {
+  display: flex;
+  gap: 20px; /* Space between the components */
+  justify-content: space-between; /* Distribute components with space between them */
+  width: 100%;
+}
+
+/* Ensure that each component takes a reasonable amount of space */
+.route-container,
+.map-container,
+.route-creator-container {
+  flex: 1; /* Allow each component to grow equally */
+  max-width: 33%; /* Set max width for each */
+}
+
+.map-container {
+  height: 80vh; /* Ensure map has appropriate height */
+}
+
+.route-creator-container {
+  /* Additional styles for the RouteCreator */
+  height: auto;
+  padding: 1rem;
+}
+
+
 #app {
   width: 100%;
   margin: 0 auto;

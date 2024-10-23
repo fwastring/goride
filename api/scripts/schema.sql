@@ -1,0 +1,85 @@
+-- -- Access roles deciding what users can do with the system.
+-- CREATE TABLE IF NOT EXISTS access_level(
+--     access_level_id SMALLINT, -- PostgreSQL uses SMALLINT instead of TINYINT
+--     level VARCHAR(10) NOT NULL UNIQUE,
+--     PRIMARY KEY (access_level_id)
+-- );
+--
+-- -- Roles deciding what options users have regarding rides
+-- CREATE TABLE IF NOT EXISTS user_role(
+--     role_id SMALLINT, -- PostgreSQL uses SMALLINT instead of TINYINT
+--     role VARCHAR(10) NOT NULL UNIQUE,
+--     PRIMARY KEY (role_id)
+-- );
+--
+-- CREATE TABLE IF NOT EXISTS users(
+--     user_id SERIAL PRIMARY KEY, -- SERIAL auto-increments in PostgreSQL
+--     access_level_id SMALLINT NOT NULL,
+--     role_id SMALLINT NOT NULL,
+--     username CITEXT NOT NULL UNIQUE, -- PostgreSQL has case-insensitive text with the CITEXT extension
+--     salt BIGINT NOT NULL,
+--     password_hash UUID NOT NULL,
+--     FOREIGN KEY (access_level_id) REFERENCES access_level(access_level_id),
+--     FOREIGN KEY (role_id) REFERENCES user_role(role_id),
+--     CHECK (LENGTH(username) >= 4) -- ensures that username has 4 or more characters
+-- );
+--
+-- -- Sessions are indexed by large random numbers instead of a sequence of integers, because they could otherwise
+-- -- be guessed by a malicious user.
+-- CREATE TABLE IF NOT EXISTS session(
+--     session_uuid UUID DEFAULT gen_random_uuid(), -- gen_random_uuid() generates random UUIDs in PostgreSQL
+--     user_id INT NOT NULL,
+--     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     PRIMARY KEY (session_uuid),
+--     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+-- );
+--
+-- -- Vehicles connected to drivers, used when starting rides
+-- CREATE TABLE IF NOT EXISTS vehicles(
+--     vehicle_id SERIAL PRIMARY KEY,
+--     owner_id INT NOT NULL,
+--     brand VARCHAR(20),
+--     model VARCHAR(20),
+--     color VARCHAR(20),
+--     age SMALLINT,
+--     total_seats INT NOT NULL,
+--     FOREIGN KEY (owner_id) REFERENCES users(user_id)
+-- );
+
+-- Rides created by drivers in the system
+CREATE TABLE IF NOT EXISTS routes(
+    route_id SERIAL PRIMARY KEY,
+    start_address VARCHAR NOT NULL,
+	end_address VARCHAR NOT NULL,
+    geometry GEOMETRY(Geometry, 4326) -- Requires PostGIS extension for geometry type
+    -- start_timestamp TIMESTAMP NOT NULL,
+    -- FOREIGN KEY (driver_id) REFERENCES users(user_id),
+    -- FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
+);
+
+-- -- Deliveries associated with rides
+-- CREATE TABLE IF NOT EXISTS delivery(
+--     route_id INT NOT NULL,
+--     user_id INT NOT NULL,
+--     passenger_start VARCHAR NOT NULL,
+--     passenger_end VARCHAR NOT NULL,
+--     PRIMARY KEY (route_id, user_id),
+--     FOREIGN KEY (route_id) REFERENCES routes(route_id),
+--     FOREIGN KEY (user_id) REFERENCES users(user_id)
+-- );
+--
+-- -- Insert initial access levels
+-- INSERT INTO access_level (access_level_id, level) VALUES (1, 'ADMIN'), (2, 'USER');
+--
+-- -- Insert initial user roles
+-- INSERT INTO user_role (role_id, role) VALUES (1, 'DRIVER'), (2, 'RIDER');
+--
+-- -- Insert example users
+-- INSERT INTO users (access_level_id, role_id, username, salt, password_hash)
+--     VALUES (1, 1, 'admin', -2883142073796788660, '8dc0e2ab-4bf1-7671-c0c4-d22ffb55ee59'),
+--            (2, 2, 'test', 5336889820313124494, '144141f3-c868-85e8-0243-805ca28cdabd');
+--
+-- -- Insert vehicles
+-- INSERT INTO vehicles (owner_id, brand, model, color, age, total_seats)
+--     VALUES (1, 'Volvo', '240', 'White', 24, 4);
+--

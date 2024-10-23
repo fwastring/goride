@@ -6,7 +6,7 @@
         layer-type="base"
         name="OpenStreetMap"
       ></l-tile-layer>
-	<l-polyline v-if="route" :lat-lngs="route.Geometry.coordinates"></l-polyline>
+	<l-polyline v-if="route" :lat-lngs="route.geometry.coordinates"></l-polyline>
     </l-map>
   </div>
 </template>
@@ -36,7 +36,6 @@ export default {
   },
   methods: {
   onMapReady(map) {
-      console.log('Map is ready:', map);
 	  this.map = map
       // You can now use the map instance for further operations
     },
@@ -44,8 +43,8 @@ export default {
 watch: {
     route(newRoute) {
       if (newRoute) {
-		let coordinates = newRoute.Geometry.coordinates
-        this.center = coordinates[0]; // Center the map on the route
+		let coordinates = newRoute.geometry.coordinates
+        this.center = coordinates[coordinates.length/2]; // Center the map on the route
 
 		this.map.fitBounds([
 			coordinates[0],
