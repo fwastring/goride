@@ -1,16 +1,6 @@
 # goride
 
-Hobby implementation of a carpooling service
-
-## Tech
-
-Backend: Golang Gin-gonic with GORM
-
-Frontend: Vue
-
-DB: PostGIS
-
-Routing: OSRM
+Golang + Vue.js + PostGIS + OSRM
 
 ## Requirements
 
